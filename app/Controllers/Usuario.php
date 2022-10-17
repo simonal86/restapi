@@ -72,7 +72,37 @@ class Usuario extends ResourceController
 
         return $this->genericResponse(null, $validation->getErrors(), 500);
     } 
-    public function apiUrl($parametro){
+    public function update($id = null)
+    {
+        if ($this->validate('usuario')) {
+            $data = $this->request->getRawInput();
+            $status = '';
+            if (strrpos('true', $data['activo']) === false) {
+                $status = 'inactive';
+            }
+            if (strrpos('false', $data['activo']) === false) {
+                $status = 'active';
+            }
+            $parametros = [
+                'name' => $data['nombre'],
+                'gender' => $data['genero'],
+                'email'  => $data['email'],
+                'status' => $status
+            ];
+            $datos = $this->curlContempora('PUT', $parametros, $id);
+            if (isset($datos[0]['message']) == 'has already been taken') {  
+                $msj = array('campo' => 'email','error' => 'Ya existe el registro.'); 
+                return $this->genericResponse($msj,'',200);  
+            }
+            $datos = $this->genericContempora($datos);
+            return $this->genericResponse($datos, null, 200);
+
+        }
+        $validation = \Config\Services::validation();
+        return $this->genericResponse(null, $validation->getErrors(), 500);
+    }
+    public function apiUrl($parametro)
+    {
         $url = 'https://gorest.co.in/public/v2/users';
         $res = $url . $parametro;
         return $res;
