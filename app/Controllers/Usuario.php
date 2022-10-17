@@ -101,6 +101,11 @@ class Usuario extends ResourceController
         $validation = \Config\Services::validation();
         return $this->genericResponse(null, $validation->getErrors(), 500);
     }
+    public function delete($id = null)
+    {
+        $datos = $this->curlContempora('DELETE',0,$id);
+        return $this->genericResponse('Registro '. $id . ' borrado.',null,200);
+    }
     public function apiUrl($parametro)
     {
         $url = 'https://gorest.co.in/public/v2/users';
