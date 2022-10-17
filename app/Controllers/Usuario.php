@@ -34,7 +34,15 @@ class Usuario extends ResourceController
         $datos = $this->genericContempora($datos);
         return $this->genericResponse($datos,'',200);
     }
-    
+    public function show($id = null)
+    {
+        $parametro='/' . $id;
+        $url = $this->apiUrl($parametro);
+        $datos = file_get_contents($url);
+        $datos = json_decode($datos,true); 
+        $datos = $this->genericContempora($datos);
+        return $this->genericResponse($datos,'',200);
+    }
     public function apiUrl($parametro){
         $url = 'https://gorest.co.in/public/v2/users';
         $res = $url . $parametro;
