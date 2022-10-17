@@ -27,6 +27,34 @@ class Validation extends BaseConfig
         CreditCardRules::class,
     ];
 
+    public $usuario = [
+        'nombre' => [
+            'rules'  => 'required',
+            'errors' => [
+                'required' => 'El campo es obligatorio.',
+            ],
+        ],
+        'email' => [
+            'rules'  => 'required|valid_email',
+            'errors' => [
+                'required' => 'El campo es obligatorio.',
+                'valid_email' => 'Debe ser un email valido.',
+            ],
+        ],
+        'genero' => [
+            'rules'  => 'required',
+            'errors' => [
+                'required' => 'El campo es obligatorio.',
+            ],
+        ],
+        'activo' => [
+            'rules'  => 'required',
+            'errors' => [
+                'required' => 'El campo es obligatorio.',
+            ],
+        ]
+    ];
+    
     /**
      * Specifies the views that are used to display the
      * errors.

@@ -43,6 +43,35 @@ class Usuario extends ResourceController
         $datos = $this->genericContempora($datos);
         return $this->genericResponse($datos,'',200);
     }
+    public function create()
+    {
+        if ($this->validate('usuario')) {
+            $status = '';
+            if (strrpos('true', $_POST['activo']) === false) {
+                $status = 'inactive';
+            }
+            if (strrpos('false', $_POST['activo']) === false) {
+                $status = 'active';
+            }
+            $parametros = [
+                'name' => $_POST['nombre'],
+                'gender' => $_POST['genero'],
+                'email'  => $_POST['email'],
+                'status' => $status
+            ];
+            $datos = $this->curlContempora('POST', $parametros);
+
+            if (isset($datos[0]['message']) == 'has already been taken') {  
+                $msj = array('campo' => 'email','error' => 'Ya existe el registro.'); 
+                return $this->genericResponse($msj,'',200);  
+            }
+            $datos = $this->genericContempora($datos);
+            return $this->genericResponse($datos,'',200);
+        }
+        $validation = \Config\Services::validation();
+
+        return $this->genericResponse(null, $validation->getErrors(), 500);
+    } 
     public function apiUrl($parametro){
         $url = 'https://gorest.co.in/public/v2/users';
         $res = $url . $parametro;
@@ -50,6 +79,7 @@ class Usuario extends ResourceController
     }
     public function genericContempora($datos)
     {
+        
         if (count($datos)>5) {
             foreach ($datos as $d)
             {
@@ -65,7 +95,6 @@ class Usuario extends ResourceController
     }
     public function genericResponse($data, $msj, $code)
     {
-
         if ($code == 200) {
             return $this->respond(array(
                 
@@ -79,6 +108,28 @@ class Usuario extends ResourceController
             ));
             
         }
+    }
+    public function curlContempora($metodo, $parametros, $id = null)
+    {
+        
+        if ($metodo=='PATCH' || $metodo == 'PUT') {
+            $id='/'.$id;
+        }
+        if (isset($parametros)!='' && $parametros != 0) {
+            $parametros = http_build_query($parametros);
+        }
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://gorest.co.in/public/v2/users'.$id); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+        curl_setopt($ch, CURLOPT_HTTPHEADER , array('Authorization: Bearer a3406c9d3a9cb8395b83cea4ac27a3ebeafde3005bb8857c0e2fa095276b1232')); 
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $metodo);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $parametros);
+        curl_setopt($ch, CURLOPT_HEADER, 0); 
+        $data = curl_exec($ch); 
+        curl_close($ch); 
+        $data = json_decode($data,true);
+        return $data;
 
     }
 
