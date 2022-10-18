@@ -11,14 +11,12 @@ class Usuario extends ResourceController
     public function index()
     {
         $parametro ='';
-        if (isset($_GET)) {
-            $parametro ='?';
-        }
+        
         if (isset($_GET['nombre'])) {
-            $parametro.='name='.$_GET['nombre'].'&';
+            $parametro='?name='.$_GET['nombre'];
         }
         if (isset($_GET['email'])) {
-            $parametro.='email='.$_GET['email'].'&';
+            $parametro='?email='.$_GET['email'];
         }
         if (isset($_GET['activo'])) {
             $status = '';
@@ -28,7 +26,7 @@ class Usuario extends ResourceController
             if (strrpos('false', $_GET['activo']) === false) {
                 $status = 'active';
             }
-            $parametro.='status='.$status.'&';
+            $parametro='?status='.$status;
         }
         $url = $this->apiUrl($parametro);
         $datos = file_get_contents($url);
@@ -37,17 +35,13 @@ class Usuario extends ResourceController
         return $this->genericResponse($datos,'',200);
     }
     public function show($id = null)
-    { 
-        if (ctype_digit($id)==true) {
-            $parametro='/' . $id;
-            $url = $this->apiUrl($parametro);
-            $datos = file_get_contents($url);
-            $datos = json_decode($datos,true); 
-            $datos = $this->genericContempora($datos);
-            return $this->genericResponse($datos,'',200);
-        }
-        return $this->genericResponse(null,'Debe ingresar un valor valido.',500);
-        
+    {
+        $parametro='/' . $id;
+        $url = $this->apiUrl($parametro);
+        $datos = file_get_contents($url);
+        $datos = json_decode($datos,true); 
+        $datos = $this->genericContempora($datos);
+        return $this->genericResponse($datos,'',200);
     }
     public function create()
     {
@@ -80,45 +74,37 @@ class Usuario extends ResourceController
     } 
     public function update($id = null)
     {
-        
-        if (ctype_digit($id)==true) {
-            if ($this->validate('usuario')) {
-                $data = $this->request->getRawInput();
-                $status = '';
-                if (strrpos('true', $data['activo']) === false) {
-                    $status = 'inactive';
-                }
-                if (strrpos('false', $data['activo']) === false) {
-                    $status = 'active';
-                }
-                $parametros = [
-                    'name' => $data['nombre'],
-                    'gender' => $data['genero'],
-                    'email'  => $data['email'],
-                    'status' => $status
-                ];
-                $datos = $this->curlContempora('PUT', $parametros, $id);
-                if (isset($datos[0]['message']) == 'has already been taken') {  
-                    $msj = array('campo' => 'email','error' => 'Ya existe el registro.'); 
-                    return $this->genericResponse($msj,'',200);  
-                }
-                $datos = $this->genericContempora($datos);
-                return $this->genericResponse($datos, null, 200);
-    
+        if ($this->validate('usuario')) {
+            $data = $this->request->getRawInput();
+            $status = '';
+            if (strrpos('true', $data['activo']) === false) {
+                $status = 'inactive';
             }
-            $validation = \Config\Services::validation();
-            return $this->genericResponse(null, $validation->getErrors(), 500);
+            if (strrpos('false', $data['activo']) === false) {
+                $status = 'active';
+            }
+            $parametros = [
+                'name' => $data['nombre'],
+                'gender' => $data['genero'],
+                'email'  => $data['email'],
+                'status' => $status
+            ];
+            $datos = $this->curlContempora('PUT', $parametros, $id);
+            if (isset($datos[0]['message']) == 'has already been taken') {  
+                $msj = array('campo' => 'email','error' => 'Ya existe el registro.'); 
+                return $this->genericResponse($msj,'',200);  
+            }
+            $datos = $this->genericContempora($datos);
+            return $this->genericResponse($datos, null, 200);
+
         }
-        return $this->genericResponse(null,'Debe ingresar un valor valido.',500);
-        
+        $validation = \Config\Services::validation();
+        return $this->genericResponse(null, $validation->getErrors(), 500);
     }
     public function delete($id = null)
     {
-        if (ctype_digit($id)==true) {
-            $datos = $this->curlContempora('DELETE',0,$id);
-            return $this->genericResponse('Registro '. $id . ' borrado.',null,200);
-        }
-        return $this->genericResponse(null,'Debe ingresar un valor valido.',500);
+        $datos = $this->curlContempora('DELETE',0,$id);
+        return $this->genericResponse('Registro '. $id . ' borrado.',null,200);
     }
     public function apiUrl($parametro)
     {
