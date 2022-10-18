@@ -13,6 +13,9 @@
 
 - Colocar carpeta en el directorio de servicio apache local. Por lo general de nombre htdocs o www dependiendo del servidor.
 
+- Correr actualizacion de deoendencias composer desde la raiz del repositorio con el sigueinte comando: "composer update"
+
+
 ### Implementación
 
 -La url para el consumo de la api es:
